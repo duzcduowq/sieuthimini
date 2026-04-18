@@ -39,7 +39,7 @@ db.serialize(() => {
         ['Sữa tươi 1L', 35000, 'Đồ uống', '/image/sua.jpg'],
         ['Nước suối', 5000, 'Đồ uống', '/image/nuocsuoi.jpg'],
         ['Trà Ô Long', 12000, 'Đồ uống', '/image/traolong.jpg'],
-        ['Bia Heineken', 18000, 'Đồ uống', '/image/Bia.jpg'],
+        ['Bia Heineken', 18000, 'Đồ uống', '/image/bia.jpg'],
         ['Nước cam ép', 40000, 'Đồ uống', '/image/nuoccam.jpg'],
         ['Cà phê lon', 15000, 'Đồ uống', '/image/caphe.jpg'],
         ['Nước tăng lực', 13000, 'Đồ uống', '/image/tangluc.jpg'],
