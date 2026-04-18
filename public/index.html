@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Siêu Thị Mini Pro</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background-color: #f4f7f6; scroll-behavior: smooth; }
+        .hero-banner { background: linear-gradient(135deg, #198754, #20c997); color: white; padding: 50px 0; text-align: center; }
+        .product-card { transition: 0.3s; border: none; border-radius: 12px; overflow: hidden; }
+        .product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.15); }
+        .cart-badge { position: absolute; top: -5px; right: -5px; font-size: 0.7rem; }
+        .category-title { border-left: 5px solid #198754; padding-left: 10px; margin-top: 40px; margin-bottom: 20px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-bold text-success" href="#"><i class="fas fa-store me-2"></i>MINI MART</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item"><a class="nav-link" href="#home">Trang chủ</a></li>
+                <li class="nav-item"><a class="nav-link" href="#categories">Sản phẩm</a></li>
+                <li class="nav-item"><a class="nav-link" href="#contact">Liên hệ</a></li>
+            </ul>
+            
+            <div class="d-flex align-items-center mt-2 mt-lg-0">
+                <div id="user-section" class="me-3 text-white">
+                    <button class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#loginModal">
+                        <i class="fas fa-user"></i> Đăng nhập
+                    </button>
+                </div>
+                <button class="btn btn-success position-relative" data-bs-toggle="offcanvas" data-bs-target="#cartSidebar">
+                    <i class="fas fa-shopping-cart"></i> Giỏ hàng
+                    <span id="cart-count" class="badge rounded-pill bg-danger cart-badge">0</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div id="home" class="hero-banner container-fluid">
+    <h1 class="display-5 fw-bold"><i class="fas fa-shopping-basket"></i> Siêu Thị Trực Tuyến</h1>
+    <p class="lead mb-0">Hàng xịn, giá tốt, giao tận nơi!</p>
+</div>
+
+<div id="categories" class="container mb-5">
+    </div>
+
+<footer id="contact" class="bg-dark text-white pt-5 pb-3 mt-auto">
+    <div class="container text-center">
+        <h4 class="mb-4 text-success">Liên Hệ Với Văn Bút</h4>
+        <p><i class="fas fa-map-marker-alt"></i> Địa chỉ: 107 Đường Lương Văn Can, Thành phố 18</p>
+        <p><i class="fas fa-phone"></i> Hotline: 0397742349</p>
+        <hr class="mt-4 border-secondary">
+        <p class="mb-0 text-secondary">© 2026 Mini Mart. Mọi quyền được Bút bảo kê.</p>
+    </div>
+</footer>
+
+<div class="offcanvas offcanvas-end" id="cartSidebar">
+    <div class="offcanvas-header bg-light border-bottom">
+        <h5 class="fw-bold mb-0 text-success"><i class="fas fa-shopping-cart"></i> Giỏ hàng</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body d-flex flex-column">
+        <div id="cart-items" class="flex-grow-1 overflow-auto"></div>
+        <hr>
+        <div class="d-flex justify-content-between fw-bold mb-3 fs-5">
+            <span>Tổng cộng:</span>
+            <span class="text-danger"><span id="cart-total">0</span> đ</span>
+        </div>
+        <button class="btn btn-success w-100 py-2 fw-bold" onclick="checkout()">
+            <i class="fas fa-check-circle"></i> THANH TOÁN
+        </button>
+    </div>
+</div>
+
+<div class="modal fade" id="loginModal" tabindex="-1">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title"><i class="fas fa-user-circle"></i> Thành viên</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="username" class="form-control mb-2" placeholder="Tên đăng nhập">
+                <input type="password" id="password" class="form-control mb-3" placeholder="Mật khẩu">
+                <button class="btn btn-success w-100 mb-2 fw-bold" onclick="handleAuth('login')">Đăng nhập</button>
+                <button class="btn btn-outline-secondary w-100 btn-sm" onclick="handleAuth('register')">Tạo tài khoản mới</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    let allProducts = [];
+    let cart = [];
+    let currentUser = null;
+
+    // 1. Tải và nhóm sản phẩm theo danh mục
+    async function loadProducts() {
+        const res = await fetch('/api/products');
+        allProducts = await res.json();
+        
+        const container = document.getElementById('categories');
+        container.innerHTML = ''; 
+
+        // Chia nhóm sản phẩm
+        const categories = {};
+        allProducts.forEach(item => {
+            if (!categories[item.category]) categories[item.category] = [];
+            categories[item.category].push(item);
+        });
+
+        // Vẽ từng nhóm ra màn hình
+        for (const [catName, prods] of Object.entries(categories)) {
+            let sectionHTML = `<h3 class="category-title">${catName}</h3><div class="row g-4">`;
+            
+            prods.forEach(p => {
+                sectionHTML += `
+                    <div class="col-6 col-md-4 col-lg-3">
+                        <div class="card h-100 product-card shadow-sm">
+                            <img src="${p.image}" class="card-img-top" style="height:180px; object-fit:cover" onerror="this.src='https://placehold.co/300x300?text=San+Pham'">
+                            <div class="card-body p-3 text-center d-flex flex-column">
+                                <h6 class="card-title mb-1 fw-bold text-dark">${p.name}</h6>
+                                <p class="text-danger fw-bold mb-3 mt-auto fs-5">${p.price.toLocaleString('vi-VN')} đ</p>
+                                <button class="btn btn-sm btn-outline-success w-100 fw-bold" onclick="addToCart(${p.id})">
+                                    <i class="fas fa-plus"></i> Thêm vào giỏ
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            sectionHTML += `</div>`;
+            container.innerHTML += sectionHTML;
+        }
+    }
+
+    // 2. Thêm vào giỏ
+    function addToCart(id) {
+        const product = allProducts.find(p => p.id === id);
+        cart.push(product);
+        updateUI();
+    }
+
+    // 3. Xóa khỏi giỏ
+    function removeFromCart(index) {
+        cart.splice(index, 1);
+        updateUI();
+    }
+
+    // 4. Cập nhật giao diện giỏ hàng
+    function updateUI() {
+        document.getElementById('cart-count').innerText = cart.length;
+        const itemsDiv = document.getElementById('cart-items');
+        let total = 0;
+        
+        if(cart.length === 0) {
+            itemsDiv.innerHTML = '<p class="text-center text-muted mt-4">Chưa có gì trong giỏ cả 🛒</p>';
+        } else {
+            itemsDiv.innerHTML = cart.map((item, index) => {
+                total += item.price;
+                return `
+                <div class="d-flex justify-content-between align-items-center mb-2 p-2 border-bottom">
+                    <span class="fw-semibold text-truncate" style="max-width: 60%;">${item.name}</span>
+                    <div class="d-flex align-items-center">
+                        <span class="text-danger me-3">${item.price.toLocaleString('vi-VN')}đ</span>
+                        <button class="btn btn-sm btn-light text-danger border-0" onclick="removeFromCart(${index})" title="Xóa">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+        document.getElementById('cart-total').innerText = total.toLocaleString('vi-VN');
+    }
+
+    // 5. Đăng ký / Đăng nhập (Đã nâng cấp chống lỗi)
+    async function handleAuth(type) {
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value.trim();
+        
+        // Nhắc nhở nếu khách chưa điền thông tin
+        if(!username || !password) {
+            return alert("⚠️ Bạn phải điền tên và mật khẩu vào ô trống trước nhé!");
+        }
+
+        try {
+            const res = await fetch(`/api/${type}`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ username, password })
+            });
+            
+            // Bắt lỗi quên khởi động lại server
+            if (!res.ok && res.status === 404) {
+                return alert("❌ Lỗi mạng! Bạn đã tắt Terminal và chạy lại 'node server.js' chưa?");
+            }
+
+            const data = await res.json();
+            
+            if(res.ok) {
+                alert("🎉 " + data.message); // Báo thành công
+                
+                if(type === 'login') {
+                    currentUser = data.user;
+                    document.getElementById('user-section').innerHTML = `
+                        <span class="me-2">Chào, <b class="text-warning">${currentUser}</b>!</span> 
+                        <button class="btn btn-sm btn-outline-light" onclick="location.reload()">Đăng xuất</button>
+                    `;
+                    // Đóng cửa sổ modal
+                    bootstrap.Modal.getInstance(document.getElementById('loginModal')).hide();
+                } else if (type === 'register') {
+                    // Đăng ký xong tự động gọi hàm đăng nhập luôn cho khách đỡ phải bấm lại
+                    handleAuth('login');
+                }
+            } else {
+                alert("❌ " + data.error); // Báo lỗi (VD: trùng tên)
+            }
+        } catch (error) {
+            console.error(error);
+            alert("🔥 Mất kết nối với máy chủ! (Hãy kiểm tra lại node server.js)");
+        }
+    }
+
+    // 6. Thanh toán
+    async function checkout() {
+        if(cart.length === 0) return alert("Giỏ hàng đang trống, hãy mua gì đó nhé!");
+        const name = currentUser || prompt("Bạn chưa đăng nhập. Vui lòng nhập tên người nhận:");
+        if(!name) return;
+
+        const total = cart.reduce((sum, item) => sum + item.price, 0);
+        const res = await fetch('/api/orders', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ customer_name: name, total_price: total })
+        });
+        const data = await res.json();
+        alert(data.message);
+        cart = [];
+        updateUI();
+        bootstrap.Offcanvas.getInstance(document.getElementById('cartSidebar')).hide();
+    }
+
+    // Chạy khi mở trang
+    loadProducts();
+    updateUI();
+</script>
+</body>
+</html>
