@@ -13,6 +13,14 @@
         .product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.15); }
         .cart-badge { position: absolute; top: -5px; right: -5px; font-size: 0.7rem; }
         .category-title { border-left: 5px solid #198754; padding-left: 10px; margin-top: 40px; margin-bottom: 20px; font-weight: bold; }
+        
+        /* CSS CHO KHUNG THANH TOÁN (MODAL) */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1055; justify-content: center; align-items: center; }
+        .checkout-box { background: white; padding: 20px; border-radius: 10px; width: 320px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .checkout-box input { width: 100%; padding: 10px; margin: 15px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        .btn-green { padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold;}
+        .btn-red { padding: 10px 20px; background: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer; width: 100%; margin-top: 10px;}
+        .btn-blue { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold;}
     </style>
 </head>
 <body>
@@ -75,10 +83,30 @@
             <span>Tổng cộng:</span>
             <span class="text-danger"><span id="cart-total">0</span> đ</span>
         </div>
-        <button class="btn btn-success w-100 py-2 fw-bold" onclick="checkout()">
+        <button class="btn btn-success w-100 py-2 fw-bold" onclick="openCheckoutModal()">
             <i class="fas fa-check-circle"></i> THANH TOÁN
         </button>
     </div>
+</div>
+
+<div id="checkoutModal" class="modal-overlay">
+  <div class="checkout-box">
+    <h4 id="modalTitle" style="margin-top: 0; font-weight: bold; color: #198754;">📍 Địa chỉ giao hàng</h4>
+    
+    <div id="step1">
+      <input type="text" id="shippingAddress" placeholder="Ví dụ: Số 10, ngõ 20, đường..." />
+      <button class="btn-green" onclick="confirmAddress()">Xác nhận địa chỉ</button>
+      <button class="btn-red" onclick="closeModal()">Hủy</button>
+    </div>
+
+    <div id="step2" style="display: none;">
+      <p style="color: #d9534f; font-weight: bold; margin-bottom: 5px;">Quét mã để thanh toán</p>
+      <p style="font-size: 13px; color: #555; margin-top:0;">(Shop sẽ giao hàng ngay sau khi nhận được tiền)</p>
+      <img src="/image/qr-thanh-toan.jpg" alt="QR Code" style="width: 100%; max-width: 250px; border-radius: 8px; margin-bottom: 15px;" onerror="this.src='https://placehold.co/200x200?text=QR+Code'"/>
+      <button class="btn-blue" onclick="completeOrder()">Đã chuyển khoản xong</button>
+      <button class="btn-red" onclick="closeModal()">Quay lại</button>
+    </div>
+  </div>
 </div>
 
 <div class="modal fade" id="loginModal" tabindex="-1">
@@ -108,21 +136,15 @@
     async function loadProducts() {
         const res = await fetch('/api/products');
         allProducts = await res.json();
-        
         const container = document.getElementById('categories');
         container.innerHTML = ''; 
-
-        // Chia nhóm sản phẩm
         const categories = {};
         allProducts.forEach(item => {
             if (!categories[item.category]) categories[item.category] = [];
             categories[item.category].push(item);
         });
-
-        // Vẽ từng nhóm ra màn hình
         for (const [catName, prods] of Object.entries(categories)) {
             let sectionHTML = `<h3 class="category-title">${catName}</h3><div class="row g-4">`;
-            
             prods.forEach(p => {
                 sectionHTML += `
                     <div class="col-6 col-md-4 col-lg-3">
@@ -162,7 +184,6 @@
         document.getElementById('cart-count').innerText = cart.length;
         const itemsDiv = document.getElementById('cart-items');
         let total = 0;
-        
         if(cart.length === 0) {
             itemsDiv.innerHTML = '<p class="text-center text-muted mt-4">Chưa có gì trong giỏ cả 🛒</p>';
         } else {
@@ -183,15 +204,11 @@
         document.getElementById('cart-total').innerText = total.toLocaleString('vi-VN');
     }
 
-    // 5. Đăng ký / Đăng nhập (Đã nâng cấp chống lỗi)
+    // 5. Đăng ký / Đăng nhập
     async function handleAuth(type) {
         const username = document.getElementById('username').value.trim();
         const password = document.getElementById('password').value.trim();
-        
-        // Nhắc nhở nếu khách chưa điền thông tin
-        if(!username || !password) {
-            return alert("⚠️ Bạn phải điền tên và mật khẩu vào ô trống trước nhé!");
-        }
+        if(!username || !password) return alert("⚠️ Bạn phải điền tên và mật khẩu vào ô trống trước nhé!");
 
         try {
             const res = await fetch(`/api/${type}`, {
@@ -199,55 +216,98 @@
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ username, password })
             });
-            
-            // Bắt lỗi quên khởi động lại server
-            if (!res.ok && res.status === 404) {
-                return alert("❌ Lỗi mạng! Bạn đã tắt Terminal và chạy lại 'node server.js' chưa?");
-            }
+            if (!res.ok && res.status === 404) return alert("❌ Lỗi mạng! Bạn đã tắt Terminal và chạy lại 'node server.js' chưa?");
 
             const data = await res.json();
-            
             if(res.ok) {
-                alert("🎉 " + data.message); // Báo thành công
-                
+                alert("🎉 " + data.message);
                 if(type === 'login') {
                     currentUser = data.user;
                     document.getElementById('user-section').innerHTML = `
                         <span class="me-2">Chào, <b class="text-warning">${currentUser}</b>!</span> 
                         <button class="btn btn-sm btn-outline-light" onclick="location.reload()">Đăng xuất</button>
                     `;
-                    // Đóng cửa sổ modal
                     bootstrap.Modal.getInstance(document.getElementById('loginModal')).hide();
                 } else if (type === 'register') {
-                    // Đăng ký xong tự động gọi hàm đăng nhập luôn cho khách đỡ phải bấm lại
                     handleAuth('login');
                 }
             } else {
-                alert("❌ " + data.error); // Báo lỗi (VD: trùng tên)
+                alert("❌ " + data.error);
             }
         } catch (error) {
             console.error(error);
-            alert("🔥 Mất kết nối với máy chủ! (Hãy kiểm tra lại node server.js)");
+            alert("🔥 Mất kết nối với máy chủ!");
         }
     }
 
-    // 6. Thanh toán
-    async function checkout() {
-        if(cart.length === 0) return alert("Giỏ hàng đang trống, hãy mua gì đó nhé!");
-        const name = currentUser || prompt("Bạn chưa đăng nhập. Vui lòng nhập tên người nhận:");
-        if(!name) return;
+    // ----------------------------------------------------
+    // CÁC HÀM XỬ LÝ THANH TOÁN MỚI BỔ SUNG Ở ĐÂY
+    // ----------------------------------------------------
 
-        const total = cart.reduce((sum, item) => sum + item.price, 0);
-        const res = await fetch('/api/orders', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ customer_name: name, total_price: total })
-        });
-        const data = await res.json();
-        alert(data.message);
-        cart = [];
-        updateUI();
+    // Mở hộp thoại thanh toán
+    function openCheckoutModal() {
+        if(cart.length === 0) return alert("Giỏ hàng đang trống, hãy mua gì đó trước nhé!");
+        
+        // Ẩn giỏ hàng Bootstrap đi cho đỡ vướng
         bootstrap.Offcanvas.getInstance(document.getElementById('cartSidebar')).hide();
+
+        // Hiển thị khung popup của mình
+        document.getElementById('checkoutModal').style.display = 'flex';
+        document.getElementById('step1').style.display = 'block';
+        document.getElementById('step2').style.display = 'none';
+        document.getElementById('modalTitle').innerText = "📍 Địa chỉ giao hàng";
+    }
+
+    // Xác nhận địa chỉ chuyển qua bước quét QR
+    function confirmAddress() {
+        const addr = document.getElementById('shippingAddress').value;
+        if (!addr.trim()) {
+            alert("Vui lòng nhập địa chỉ để shop giao hàng cho bạn nhé!");
+            return;
+        }
+        document.getElementById('step1').style.display = 'none';
+        document.getElementById('step2').style.display = 'block';
+        document.getElementById('modalTitle').innerText = "💳 Thanh toán đơn hàng";
+    }
+
+    // Đóng hộp thoại
+    function closeModal() {
+        document.getElementById('checkoutModal').style.display = 'none';
+    }
+
+    // Chốt đơn gửi về Server
+    async function completeOrder() {
+        const address = document.getElementById('shippingAddress').value;
+        const total = cart.reduce((sum, item) => sum + item.price, 0);
+        
+        // Lấy tên khách hàng hoặc để "Khách vãng lai" nếu chưa đăng nhập
+        let user = currentUser || "Khách vãng lai"; 
+        
+        // Gộp tên và địa chỉ để lưu vào Database
+        const customerInfo = user + " - Đ/c: " + address;
+
+        try {
+            const res = await fetch('/api/orders', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    customer_name: customerInfo,
+                    total_price: total 
+                })
+            });
+            const data = await res.json();
+            
+            alert("✅ Đặt hàng thành công!\nShop sẽ kiểm tra và giao đến địa chỉ: " + address);
+            
+            // Xóa giỏ hàng, đóng popup và làm sạch ô nhập
+            cart = [];
+            updateUI();
+            closeModal();
+            document.getElementById('shippingAddress').value = "";
+            
+        } catch (err) {
+            alert("Lỗi khi đặt hàng: " + err);
+        }
     }
 
     // Chạy khi mở trang
