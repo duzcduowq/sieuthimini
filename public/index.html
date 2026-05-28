@@ -3,429 +3,295 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Siêu Thị Mini Trực Tuyến 4.0</title>
+    <title>Siêu Thị Mini 4.0 - Nguyễn Văn Bút</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
+        :root { --primary: #005088; --accent: #11CAA0; --orange: #ff5722; --light: #f4f6f9; --dark: #2c3e50; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Roboto', sans-serif; }
-        body { background-color: #f4f6f9; color: #333; padding-bottom: 60px; }
+        body { background-color: var(--light); color: #333; }
         
-        /* Header & Khu vực Tài khoản */
-        header { background-color: #005088; color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        header h1 { font-size: 24px; font-weight: 700; }
+        header { background-color: var(--primary); color: white; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.1); flex-wrap: wrap; gap: 10px; }
+        .logo { font-size: 22px; font-weight: bold; }
+        .auth-container { display: flex; gap: 8px; align-items: center; }
+        .auth-container input { padding: 6px 10px; border-radius: 4px; border: none; outline: none; width: 120px; font-size: 12px; }
+        .btn-auth { background: var(--accent); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-reg { background: #f39c12; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+
+        .main-container { display: flex; max-width: 1200px; margin: 20px auto; padding: 0 20px; gap: 20px; flex-wrap: wrap; }
+        .products-section { flex: 3; min-width: 300px; }
+        .cart-section { flex: 1; min-width: 300px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); height: fit-content; position: sticky; top: 100px; }
+
+        .category-buttons { margin-bottom: 20px; display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; }
+        .btn-cat { padding: 8px 18px; border: 1px solid var(--primary); background: white; color: var(--primary); border-radius: 20px; cursor: pointer; font-weight: 500; white-space: nowrap; }
+        .btn-cat.active { background: var(--primary); color: white; }
+
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; }
+        .product-card { background: white; padding: 12px; border-radius: 8px; border: 1px solid #eef2f5; text-align: center; }
+        .product-card img { width: 100%; height: 130px; object-fit: contain; margin-bottom: 10px; }
+        .product-card h3 { font-size: 14px; height: 35px; overflow: hidden; margin-bottom: 8px; }
+        .product-card .price { color: var(--orange); font-weight: bold; margin-bottom: 10px; }
+        .btn-add { background: var(--primary); color: white; border: none; width: 100%; padding: 8px; border-radius: 4px; cursor: pointer; }
+
+        .cart-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #eee; font-size: 13px; }
+        .cart-total { margin-top: 15px; font-weight: bold; color: var(--orange); font-size: 18px; text-align: right; }
+        .btn-checkout { background: var(--accent); color: white; width: 100%; padding: 12px; border: none; border-radius: 5px; margin-top: 15px; font-weight: bold; cursor: pointer; }
+
+        .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:2000; justify-content:center; align-items:center; }
+        .modal-content { background:white; padding:25px; border-radius:10px; width:90%; max-width:450px; position:relative; }
+        .modal-content input, .modal-content textarea { width:100%; padding:10px; margin: 8px 0; border:1px solid #ddd; border-radius:5px; }
         
-        .auth-container input { padding: 8px 12px; margin-right: 6px; border: none; border-radius: 4px; font-size: 14px; }
-        .btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.2s; }
-        .btn-register { background-color: #11CAA0; color: white; margin-right: 6px; }
-        .btn-login { background-color: #ffffff; color: #005088; }
-        .btn-logout { background-color: #ff4d4d; color: white; }
-        .btn-register:hover, .btn-logout:hover { opacity: 0.9; }
-        .btn-login:hover { background-color: #e6e6e6; }
-
-        /* Bố cục chính */
-        .main-container { display: flex; max-width: 1200px; margin: 30px auto; padding: 0 20px; gap: 30px; }
-        .products-section { flex: 3; }
-        .cart-section { flex: 1; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); height: fit-content; position: sticky; top: 100px; }
-
-        /* Bộ lọc danh mục */
-        .category-buttons { margin-bottom: 20px; display: flex; gap: 10px; }
-        .btn-cat { padding: 10px 20px; border: 1px solid #005088; background: white; color: #005088; border-radius: 20px; cursor: pointer; font-weight: 500; }
-        .btn-cat.active, .btn-cat:hover { background: #005088; color: white; }
-
-        /* Lưới sản phẩm */
-        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
-        .product-card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); text-align: center; border: 1px solid #eef2f5; display: flex; flex-direction: column; justify-content: space-between; }
-        .product-card img { max-width: 100%; height: 150px; object-fit: cover; border-radius: 4px; margin-bottom: 12px; }
-        .product-card h3 { font-size: 16px; margin-bottom: 8px; color: #444; height: 40px; overflow: hidden; }
-        .product-card .category { font-size: 12px; color: #888; text-transform: uppercase; margin-bottom: 6px; }
-        .product-card .price { font-size: 18px; color: #ff5722; font-weight: bold; margin-bottom: 12px; }
-        .btn-add { background: #005088; color: white; width: 100%; padding: 10px; border: none; border-radius: 4px; cursor: pointer; font-weight: 500; }
-        .btn-add:hover { background: #003d66; }
-
-        /* Giỏ hàng */
-        .cart-section h2 { font-size: 20px; margin-bottom: 15px; border-bottom: 2px solid #f4f6f9; padding-bottom: 10px; color: #005088; }
-        .cart-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px dashed #eee; font-size: 14px; }
-        .cart-item-qty button { padding: 2px 6px; border: 1px solid #ccc; background: #fff; cursor: pointer; border-radius: 3px; }
-        .cart-total { display: flex; justify-content: space-between; font-weight: bold; font-size: 18px; margin-top: 20px; margin-bottom: 20px; color: #ff5722; }
-        .btn-checkout { background: #11CAA0; color: white; width: 100%; padding: 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; font-weight: bold; }
-        .btn-checkout:hover { opacity: 0.9; }
-
-        /* Hộp thoại Thanh toán (Modal) */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
-        .modal-content { background: white; padding: 30px; border-radius: 8px; max-width: 450px; width: 90%; box-shadow: 0 5px 15px rgba(0,0,0,0.3); position: relative; }
-        .modal h3 { margin-bottom: 15px; color: #005088; }
-        .modal input { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; }
-        .modal-buttons { display: flex; gap: 10px; }
-        .btn-confirm { background: #11CAA0; color: white; flex: 1; padding: 10px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        .btn-cancel { background: #95a5a6; color: white; flex: 1; padding: 10px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        footer { background: var(--dark); color: white; padding: 40px 5%; margin-top: 50px; line-height: 1.8; }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>🏪 Siêu Thị Mini 4.0</h1>
-        
-        <div class="auth-container">
-            <div id="auth-inputs">
-                <input type="text" id="username" placeholder="Tên đăng nhập">
-                <input type="password" id="password" placeholder="Mật khẩu">
-                <button class="btn btn-register" onclick="dangKy()">Đăng Ký</button>
-                <button class="btn btn-login" onclick="dangNhap()">Đăng Nhập</button>
-            </div>
-            <div id="auth-user" style="display: none;">
-                <span id="user-welcome" style="margin-right: 15px; font-weight: 500;"></span>
-                <button class="btn btn-logout" onclick="dangXuat()">Đăng Xuất</button>
-            </div>
-        </div>
-    </header>
+<header>
+    <div class="logo">🏪 SIÊU THỊ MINI 4.0</div>
+    <div class="auth-container" id="auth-ui">
+        <input type="text" id="user-input" placeholder="Tên đăng nhập">
+        <input type="password" id="pass-input" placeholder="Mật khẩu">
+        <button class="btn-reg" onclick="handleRegister()">ĐĂNG KÝ</button>
+        <button class="btn-auth" onclick="handleLogin()">ĐĂNG NHẬP</button>
+    </div>
+</header>
 
-    <div class="main-container">
-        
-        <div class="products-section">
-            <div class="category-buttons">
-                <button class="btn-cat active" onclick="changeCategory(this, 'Tất cả')">Tất cả</button>
-                <button class="btn-cat" onclick="changeCategory(this, 'Đồ ăn')">Đồ ăn</button>
-                <button class="btn-cat" onclick="changeCategory(this, 'Đồ uống')">Đồ uống</button>
-                <button class="btn-cat" onclick="changeCategory(this, 'Gia dụng')">Gia dụng</button>
-            </div>
-            <div class="product-grid" id="product-grid"></div>
+<div class="main-container">
+    <div class="products-section">
+        <div class="category-buttons">
+            <button class="btn-cat active" onclick="filterProducts(this, 'Tất cả')">Tất cả</button>
+            <button class="btn-cat" onclick="filterProducts(this, 'Đồ Ăn')">Đồ ăn</button>
+            <button class="btn-cat" onclick="filterProducts(this, 'Đồ Uống')">Đồ uống</button>
+            <button class="btn-cat" onclick="filterProducts(this, 'Đồ Gia Dụng')">Gia dụng</button>
         </div>
-
-        <div class="cart-section">
-            <h2>🛒 Giỏ Hàng</h2>
-            <div id="cart-items">
-                <p style="color: #888; text-align: center; padding: 20px 0;">Giỏ hàng đang trống</p>
-            </div>
-            <div class="cart-total">
-                <span>Tổng tiền:</span>
-                <span id="cart-total">0 đ</span>
-            </div>
-            <button class="btn-checkout" onclick="moGiaoDienThanhToan()">THANH TOÁN NGAY</button>
-        </div>
+        <div class="product-grid" id="product-grid"></div>
     </div>
 
-    <div id="checkout-modal" class="modal">
-        <div class="modal-content">
-            <div id="checkout-form-step">
-                <h3>Nhập thông tin nhận hàng</h3>
-                <input type="text" id="cust-name" placeholder="Họ và tên người nhận">
-                <input type="text" id="cust-address" placeholder="Địa chỉ giao hàng thực tế">
-                <div class="modal-buttons">
-                    <button class="btn-confirm" onclick="xacNhanDatHang()">Xác Nhận Đặt Hàng</button>
-                    <button class="btn-cancel" onclick="dongGiaoDienThanhToan()">Hủy</button>
+    <div class="cart-section">
+        <h3>🛒 Giỏ hàng (<span id="user-name-display">Khách</span>)</h3>
+        <div id="cart-items"><p style="text-align:center; color:#999; padding:20px;">Trống</p></div>
+        <div class="cart-total">Tổng: <span id="cart-total">0 đ</span></div>
+        <button class="btn-checkout" onclick="openCheckout()">ĐẶT HÀNG</button>
+    </div>
+</div>
+
+<div id="checkout-modal" class="modal">
+    <div class="modal-content">
+        <span onclick="closeCheckout()" style="position:absolute; right:15px; top:10px; cursor:pointer; font-size:20px;">&times;</span>
+        <div id="step-info">
+            <h3 style="text-align:center; color:var(--primary); margin-bottom:15px;">THÔNG TIN GIAO HÀNG</h3>
+            <input type="text" id="cust_name" placeholder="Họ tên khách hàng">
+            <input type="tel" id="cust_phone" placeholder="Số điện thoại">
+            <textarea id="cust_address" placeholder="Địa chỉ giao hàng"></textarea>
+            <button class="btn-checkout" onclick="processPayment()">XÁC NHẬN & HIỆN QR</button>
+        </div>
+        <div id="step-qr" style="display:none; text-align:center;">
+            <h3 style="color:var(--accent)">THANH TOÁN VIETQR</h3>
+            <img id="qr-image" src="" style="width:200px; margin:15px 0; border:1px solid #eee;">
+            <div style="font-weight:bold; color:var(--orange); margin-bottom:15px;">Tổng tiền: <span id="qr-final-amount">0</span>đ</div>
+            <button class="btn-add" style="background:#005088; margin-bottom:10px;" id="btn-pdf-download" onclick="xuatHoaDonPDF()">📄 TẢI HÓA ĐƠN PDF</button>
+            <button class="btn-add" style="background:#95a5a6;" onclick="location.reload()">HOÀN TẤT</button>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <div style="display:flex; flex-wrap:wrap; gap:40px; justify-content: space-between;">
+        <div style="flex:1; min-width:250px;">
+            <h3>HỆ THỐNG SIÊU THỊ 4.0</h3>
+            <p>Báo cáo đồ án chuyên ngành - Nhóm 3 UNETI</p>
+        </div>
+        <div style="flex:1; min-width:250px;">
+            <h3 id="contact-heading">THÔNG TIN LIÊN HỆ</h3>
+            <p>👤 Nguyễn Văn Bút | 📞 0397742349</p>
+            <p>📍 107 Lương Văn Can, TP. Nam Định</p>
+            <p>📧 butcon2k5@gmail.com</p>
+        </div>
+    </div>
+</footer>
+
+<script>
+    // 1. DỮ LIỆU SẢN PHẨM (Khớp tên file ảnh)
+    const tatCaSanPham = [
+        {id:1, name:'Mì Hảo Hảo', price:5000, category:'Đồ Ăn', image:'image/mi.jpg'},
+        {id:2, name:'Gạo ST25 5kg', price:150000, category:'Đồ Ăn', image:'image/gao.jpg'},
+        {id:3, name:'Trứng gà (10 quả)', price:32000, category:'Đồ Ăn', image:'image/trung.jpg'},
+        {id:4, name:'Snack khoai tây', price:12000, category:'Đồ Ăn', image:'image/snack.jpg'},
+        {id:5, name:'Banh mì Sandwich', price:32000, category:'Đồ Ăn', image:'image/banhmi.jpg'},
+        {id:6, name:'Xúc xích Vissan', price:45000, category:'Đồ Ăn', image:'image/xucxich.jpg'},
+        {id:7, name:'Thịt bò Úc 500g', price:180000, category:'Đồ Ăn', image:'image/thitbo.jpg'},
+        {id:8, name:'Rau cải ngọt 1kg', price:20000, category:'Đồ Ăn', image:'image/rau.jpg'},
+        {id:9, name:'Cà chua Đà Lạt', price:25000, category:'Đồ Ăn', image:'image/cachua.jpg'},
+        {id:10, name:'Táo Mỹ 1kg', price:65000, category:'Đồ Ăn', image:'image/tao.jpg'},
+        {id:11, name:'Coca Cola 330ml', price:10000, category:'Đồ Uống', image:'image/coca.jpg'},
+        {id:12, name:'Sữa tươi 1L', price:35000, category:'Đồ Uống', image:'image/sua.jpg'},
+        {id:13, name:'Nước suối Lavie', price:5000, category:'Đồ Uống', image:'image/nuocsuoi.jpg'},
+        {id:14, name:'Trà Ô Long', price:12000, category:'Đồ Uống', image:'image/traolong.jpg'},
+        {id:15, name:'Bia Heineken', price:18000, category:'Đồ Uống', image:'image/bia.jpg'},
+        {id:16, name:'Nước cam ép', price:40000, category:'Đồ Uống', image:'image/nuoccam.jpg'},
+        {id:17, name:'Cà phê lon', price:15000, category:'Đồ Uống', image:'image/caphe.jpg'},
+        {id:18, name:'Nước tăng lực', price:13000, category:'Đồ Uống', image:'image/tangluc.jpg'},
+        {id:19, name:'Nước ép táo', price:42000, category:'Đồ Uống', image:'image/eptao.jpg'},
+        {id:20, name:'Trà đào cam sả', price:30000, category:'Đồ Uống', image:'image/tradao.jpg'},
+        {id:21, name:'Nước mắm Chinsu', price:45000, category:'Đồ Gia Dụng', image:'image/nuocmam.jpg'},
+        {id:22, name:'Dầu ăn Tường An', price:55000, category:'Đồ Gia Dụng', image:'image/dauan.jpg'},
+        {id:23, name:'Bột giặt Omo', price:145000, category:'Đồ Gia Dụng', image:'image/botgiat.jpg'},
+        {id:24, name:'Nước rửa chén', price:35000, category:'Đồ Gia Dụng', image:'image/ruachen.jpg'},
+        {id:25, name:'Giấy vệ sinh', price:60000, category:'Đồ Gia Dụng', image:'image/giay.jpg'},
+        {id:26, name:'Kem đánh răng', price:32000, category:'Đồ Gia Dụng', image:'image/kemdanhrang.jpg'},
+        {id:27, name:'Dầu gội Romano', price:120000, category:'Đồ Gia Dụng', image:'image/daugoi.jpg'},
+        {id:28, name:'Sữa tắm Lifebuoy', price:95000, category:'Đồ Gia Dụng', image:'image/suatam.jpg'},
+        {id:29, name:'Nước lau sàn', price:45000, category:'Đồ Gia Dụng', image:'image/lausan.jpg'},
+        {id:30, name:'Nước xả vải', price:85000, category:'Đồ Gia Dụng', image:'image/xavai.jpg'}
+    ];
+
+    let dbUsers = JSON.parse(localStorage.getItem('users')) || {};
+    let activeUser = "Khách";
+    let gioHang = [];
+
+    function handleRegister() {
+        const u = document.getElementById('user-input').value;
+        const p = document.getElementById('pass-input').value;
+        if(!u || !p) return alert("Vui lòng nhập đủ!");
+        dbUsers[u] = p;
+        localStorage.setItem('users', JSON.stringify(dbUsers));
+        alert("Đăng ký thành công!");
+    }
+
+    function handleLogin() {
+        const u = document.getElementById('user-input').value;
+        const p = document.getElementById('pass-input').value;
+        if(dbUsers[u] === p) {
+            activeUser = u;
+            document.getElementById('user-name-display').innerText = u;
+            document.getElementById('auth-ui').innerHTML = `<span><i class="fas fa-user"></i> ${u}</span>`;
+            alert("Đăng nhập thành công!");
+        } else alert("Sai thông tin!");
+    }
+
+    function renderProducts(list) {
+        const grid = document.getElementById('product-grid');
+        grid.innerHTML = list.map(p => `
+            <div class="product-card">
+                <img src="${p.image}" onerror="this.src='https://via.placeholder.com/150'">
+                <h3>${p.name}</h3>
+                <div class="price">${p.price.toLocaleString()} đ</div>
+                <button class="btn-add" onclick="themVaoGio(${p.id})">Thêm vào giỏ</button>
+            </div>
+        `).join('');
+    }
+
+    function filterProducts(btn, cat) {
+        document.querySelectorAll('.btn-cat').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderProducts(cat === 'Tất cả' ? tatCaSanPham : tatCaSanPham.filter(p => p.category === cat));
+    }
+
+    function themVaoGio(id) {
+        const sp = tatCaSanPham.find(p => p.id === id);
+        const item = gioHang.find(i => i.id === id);
+        if(item) item.qty++; else gioHang.push({...sp, qty: 1});
+        updateCart();
+    }
+
+    function updateCart() {
+        const container = document.getElementById('cart-items');
+        if(gioHang.length === 0) container.innerHTML = '<p style="text-align:center; padding:20px;">Trống</p>';
+        else container.innerHTML = gioHang.map(i => `<div class="cart-item"><span>${i.name} (x${i.qty})</span><b>${(i.price * i.qty).toLocaleString()}đ</b></div>`).join('');
+        const total = gioHang.reduce((s, i) => s + (i.price * i.qty), 0);
+        document.getElementById('cart-total').innerText = total.toLocaleString() + ' đ';
+    }
+
+    function openCheckout() {
+        if(gioHang.length === 0) return alert("Giỏ hàng trống!");
+        document.getElementById('checkout-modal').style.display = 'flex';
+    }
+    function closeCheckout() { document.getElementById('checkout-modal').style.display = 'none'; }
+
+    function processPayment() {
+        const n = document.getElementById('cust_name').value;
+        const p = document.getElementById('cust_phone').value;
+        if(!n || !p) return alert("Vui lòng nhập đủ tên và SĐT!");
+        const total = gioHang.reduce((s, i) => s + (i.price * i.qty), 0);
+        document.getElementById('qr-image').src = `https://img.vietqr.io/image/MB-0397742349-compact2.png?amount=${total}&addInfo=ThanhToan_${p}&accountName=NGUYEN%20VAN%20BUT`;
+        document.getElementById('qr-final-amount').innerText = total.toLocaleString();
+        document.getElementById('step-info').style.display = 'none';
+        document.getElementById('step-qr').style.display = 'block';
+    }
+
+    // --- HÀM XUẤT PDF ĐÃ FIX LỖI TRẮNG TRANG ---
+    function xuatHoaDonPDF() {
+        const btn = document.getElementById('btn-pdf-download');
+        btn.innerText = "Đang tạo PDF...";
+        btn.disabled = true;
+
+        const name = document.getElementById('cust_name').value;
+        const phone = document.getElementById('cust_phone').value;
+        const addr = document.getElementById('cust_address').value;
+        const total = gioHang.reduce((s, i) => s + (i.price * i.qty), 0);
+        
+        // Tạo chuỗi HTML sạch cho PDF
+        const pdfContent = `
+            <div style="padding:30px; font-family:Arial; line-height:1.6; color:#333;">
+                <div style="text-align:center; margin-bottom:20px;">
+                    <h1 style="color:#005088; margin:0;">SIÊU THỊ MINI 4.0</h1>
+                    <p style="margin:5px 0;">Mã đơn: DH-${Date.now().toString().slice(-6)}</p>
+                </div>
+                
+                <div style="margin-bottom:20px; border:1px solid #eee; padding:15px; border-radius:8px;">
+                    <p><b>Khách hàng:</b> ${name}</p>
+                    <p><b>Số điện thoại:</b> ${phone}</p>
+                    <p><b>Địa chỉ:</b> ${addr}</p>
+                    <p><b>Ngày mua:</b> ${new Date().toLocaleString()}</p>
+                </div>
+
+                <table style="width:100%; border-collapse:collapse; margin-top:10px;">
+                    <tr style="background:#005088; color:white;">
+                        <th style="padding:10px; border:1px solid #ddd; text-align:left;">Sản phẩm</th>
+                        <th style="padding:10px; border:1px solid #ddd; text-align:center;">SL</th>
+                        <th style="padding:10px; border:1px solid #ddd; text-align:right;">Thành tiền</th>
+                    </tr>
+                    ${gioHang.map(i => `
+                        <tr>
+                            <td style="padding:10px; border:1px solid #ddd;">${i.name}</td>
+                            <td style="padding:10px; border:1px solid #ddd; text-align:center;">${i.qty}</td>
+                            <td style="padding:10px; border:1px solid #ddd; text-align:right;">${(i.price*i.qty).toLocaleString()}đ</td>
+                        </tr>
+                    `).join('')}
+                </table>
+
+                <h2 style="text-align:right; color:#ff5722; margin-top:20px;">TỔNG CỘNG: ${total.toLocaleString()}đ</h2>
+
+                <div style="margin-top:40px; padding:20px; background:#f4f6f9; border-radius:8px;">
+                    <h3 style="margin-top:0; color:#005088;">THÔNG TIN SHOP</h3>
+                    <p>👤 <b>Chủ sở hữu:</b> Nguyễn Văn Bút</p>
+                    <p>📞 <b>Hotline/Zalo:</b> 0397742349</p>
+                    <p>📍 <b>Địa chỉ:</b> 107 Lương Văn Can, TP. Nam Định</p>
+                    <p>📧 <b>Email:</b> butcon2k5@gmail.com</p>
                 </div>
             </div>
-            
-            <div id="checkout-qr-step" style="display: none; text-align: center;">
-                <h3 style="color: #11CAA0;">🎉 Đặt hàng thành công!</h3>
-                <p style="font-size: 14px; margin-bottom: 15px; color: #666;">Vui lòng quét mã QR dưới đây để hoàn tất thanh toán:</p>
-                <img src="/image/qr-thanh-toan.jpg" alt="Mã QR Chuyển Khoản" style="max-width: 220px; width: 100%; border: 1px solid #eee; padding: 5px; border-radius: 4px;" onerror="this.src='https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=Siêu thị mini số hóa 4.0'">
-                <p style="margin-top: 15px; font-weight: bold; color: #ff5722;">Tiền sẽ được chuyển thẳng về ví của chủ shop!</p>
-                
-                <button class="btn" style="margin-top: 20px; width: 100%; background-color: #005088; color: white; padding: 12px; font-size: 15px;" onclick="xuatHoaDonPDF()">📄 XUẤT HÓA ĐƠN (FILE PDF)</button>
-                
-                <button class="btn-confirm" style="margin-top: 10px; width: 100%;" onclick="hoanThanhDonHang()">Xong (Làm mới giỏ hàng)</button>
-            </div>
-        </div>
-    </div>
+        `;
 
-    <script>
-        let danhSachGioHang = [];
-        let tatCaSanPham = [];
-        let userHienTai = null;
-
-        window.onload = function() {
-            taiDanhSachSanPham();
+        const opt = {
+            margin: 10,
+            filename: `HoaDon_${name}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
-        function taiDanhSachSanPham() {
-            fetch('/api/products')
-                .then(res => res.json())
-                .then(data => {
-                    tatCaSanPham = data;
-                    hienThiSanPham(data);
-                })
-                .catch(err => console.error("Lỗi kết nối API lấy sản phẩm:", err));
-        }
-
-        function hienThiSanPham(products) {
-            const grid = document.getElementById('product-grid');
-            grid.innerHTML = '';
-            if(products.length === 0) {
-                grid.innerHTML = '<p style="grid-column: span 3; text-align:center; color:#888;">Không có sản phẩm nào.</p>';
-                return;
-            }
-            products.forEach(p => {
-                grid.innerHTML += `
-                    <div class="product-card">
-                        <div>
-                            <span class="category">${p.category}</span>
-                            <img src="${p.image}" alt="${p.name}" onerror="this.src='https://images.unsplash.com/photo-1542838132-92c53300491e?w=400'">
-                            <h3>${p.name}</h3>
-                        </div>
-                        <div>
-                            <p class="price">${p.price.toLocaleString('vi-VN')} đ</p>
-                            <button class="btn-add" onclick="themVaoGio(${p.id})">Thêm vào giỏ</button>
-                        </div>
-                    </div>
-                `;
+        // Chờ 0.5s để chắc chắn nội dung sẵn sàng rồi mới xuất
+        setTimeout(() => {
+            html2pdf().from(pdfContent).set(opt).save().then(() => {
+                btn.innerText = "📄 TẢI HÓA ĐƠN PDF";
+                btn.disabled = false;
             });
-        }
+        }, 500);
+    }
 
-        function changeCategory(element, category) {
-            document.querySelectorAll('.btn-cat').forEach(b => b.classList.remove('active'));
-            element.classList.add('active');
-            if (category === 'Tất cả') {
-                hienThiSanPham(tatCaSanPham);
-            } else {
-                const filtered = tatCaSanPham.filter(p => p.category === category);
-                hienThiSanPham(filtered);
-            }
-        }
-
-        function themVaoGio(id) {
-            const sp = tatCaSanPham.find(p => p.id === id);
-            const itemTrongGio = danhSachGioHang.find(item => item.product.id === id);
-            if (itemTrongGio) {
-                itemTrongGio.quantity++;
-            } else {
-                danhSachGioHang.push({ product: sp, quantity: 1 });
-            }
-            capNhatGiaoDienGioHang();
-        }
-
-        function doiSoLuong(id, step) {
-            const item = danhSachGioHang.find(item => item.product.id === id);
-            if (item) {
-                item.quantity += step;
-                if (item.quantity <= 0) {
-                    danhSachGioHang = danhSachGioHang.filter(item => item.product.id !== id);
-                }
-            }
-            capNhatGiaoDienGioHang();
-        }
-
-        function capNhatGiaoDienGioHang() {
-            const container = document.getElementById('cart-items');
-            container.innerHTML = '';
-            let tongTien = 0;
-            if (danhSachGioHang.length === 0) {
-                container.innerHTML = '<p style="color: #888; text-align: center; padding: 20px 0;">Giỏ hàng đang trống</p>';
-                document.getElementById('cart-total').innerText = '0 đ';
-                return;
-            }
-            danhSachGioHang.forEach(item => {
-                const thanhTienItem = item.product.price * item.quantity;
-                tongTien += thanhTienItem;
-                container.innerHTML += `
-                    <div class="cart-item">
-                        <div style="max-width: 50%;">
-                            <strong>${item.product.name}</strong><br>
-                            <span style="color:#ff5722; font-size:12px;">${item.product.price.toLocaleString('vi-VN')}đ</span>
-                        </div>
-                        <div class="cart-item-qty">
-                            <button onclick="doiSoLuong(${item.product.id}, -1)">-</button>
-                            <span style="margin: 0 5px; font-weight:bold;">${item.quantity}</span>
-                            <button onclick="doiSoLuong(${item.product.id}, 1)">+</button>
-                        </div>
-                        <span style="font-weight:500;">${thanhTienItem.toLocaleString('vi-VN')}đ</span>
-                    </div>
-                `;
-            });
-            document.getElementById('cart-total').innerText = tongTien.toLocaleString('vi-VN') + ' đ';
-        }
-
-        function dangKy() {
-            const u = document.getElementById('username').value.trim();
-            const p = document.getElementById('password').value.trim();
-            if(!u || !p) { alert("Vui lòng nhập đủ tên đăng nhập và mật khẩu!"); return; }
-            fetch('/api/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: u, password: p })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if(data.error) { alert("Lỗi đăng ký: " + data.error); } 
-                else { alert(data.message); userHienTai = u; chuyenGiaoDienDaDangNhap(); }
-            });
-        }
-
-        function dangNhap() {
-            const u = document.getElementById('username').value.trim();
-            const p = document.getElementById('password').value.trim();
-            if(!u || !p) { alert("Vui lòng nhập đủ tên đăng nhập và mật khẩu!"); return; }
-            fetch('/api/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: u, password: p })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if(data.error) { alert("Lỗi: " + data.error); } 
-                else { alert(data.message); userHienTai = data.user; chuyenGiaoDienDaDangNhap(); }
-            });
-        }
-
-        function chuyenGiaoDienDaDangNhap() {
-            document.getElementById('auth-inputs').style.display = 'none';
-            document.getElementById('auth-user').style.display = 'block';
-            document.getElementById('user-welcome').innerText = `👋 Chào, ${userHienTai}!`;
-        }
-
-        function dangXuat() {
-            userHienTai = null;
-            document.getElementById('auth-inputs').style.display = 'block';
-            document.getElementById('auth-user').style.display = 'none';
-            document.getElementById('username').value = '';
-            document.getElementById('password').value = '';
-            alert("Đã đăng xuất tài khoản.");
-        }
-
-        function moGiaoDienThanhToan() {
-            if (danhSachGioHang.length === 0) { alert("Giỏ hàng trống!"); return; }
-            document.getElementById('checkout-modal').style.display = 'flex';
-        }
-
-        function dongGiaoDienThanhToan() {
-            document.getElementById('checkout-modal').style.display = 'none';
-        }
-
-        function xacNhanDatHang() {
-            const tenKhach = document.getElementById('cust-name').value.trim();
-            const diaChi = document.getElementById('cust-address').value.trim();
-            if(!tenKhach || !diaChi) { alert("Vui lòng nhập tên và địa chỉ!"); return; }
-
-            let tongGiaTriDon = danhSachGioHang.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
-            fetch('/api/orders', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ customer_name: tenKhach + " - Đ/c: " + diaChi, total_price: tongGiaTriDon })
-            })
-            .then(res => res.json())
-            .then(data => {
-                document.getElementById('checkout-form-step').style.display = 'none';
-                document.getElementById('checkout-qr-step').style.display = 'block';
-            })
-            .catch(err => alert("Lỗi hệ thống khi lưu đơn hàng!"));
-        }
-
-        // HÀM TẠO VÀ XUẤT HÓA ĐƠN FILE PDF
-        function xuatHoaDonPDF() {
-            const tenKhach = document.getElementById('cust-name').value.trim();
-            const diaChi = document.getElementById('cust-address').value.trim();
-            let tongTien = danhSachGioHang.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
-            
-            let d = new Date();
-            let ngayThang = `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()} ${d.getHours()}:${d.getMinutes()}`;
-            let maDon = "HD" + d.getTime().toString().substring(7);
-
-            // Xây dựng bố cục HTML cho tờ hóa đơn chuyên nghiệp
-            let invoiceHTML = `
-                <div style="padding: 40px; font-family: 'Arial', sans-serif; color: #333; line-height: 1.6;">
-                    <div style="text-align: center; margin-bottom: 30px;">
-                        <h1 style="color: #005088; margin: 0; font-size: 26px; font-weight: bold;">SIÊU THỊ MINI TRỰC TUYẾN 4.0</h1>
-                        <p style="margin: 5px 0; color: #666; font-size: 14px;">Hệ thống bán hàng số hóa thông minh - Nhóm 3</p>
-                        <p style="margin: 5px 0; color: #666; font-size: 14px;">Điện thoại: 0397.742.349</p>
-                        <h2 style="margin-top: 25px; color: #ff5722; font-size: 22px; border-bottom: 3px solid #ff5722; padding-bottom: 5px; display: inline-block; text-transform: uppercase;">HÓA ĐƠN BÁN HÀNG</h2>
-                    </div>
-                    
-                    <table style="width: 100%; margin-bottom: 20px; font-size: 14px;">
-                        <tr>
-                            <td style="width: 50%; padding: 4px 0;"><strong>Mã hóa đơn:</strong> ${maDon}</td>
-                            <td style="text-align: right; padding: 4px 0;"><strong>Ngày mua:</strong> ${ngayThang}</td>
-                        </tr>
-                        <tr>
-                            <td colspan="2" style="padding: 4px 0;"><strong>Khách hàng:</strong> ${tenKhach}</td>
-                        </tr>
-                        <tr>
-                            <td colspan="2" style="padding: 4px 0;"><strong>Địa chỉ giao hàng:</strong> ${diaChi}</td>
-                        </tr>
-                    </table>
-
-                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px; font-size: 14px;">
-                        <thead>
-                            <tr style="background-color: #005088; color: white; text-align: left;">
-                                <th style="padding: 10px; border: 1px solid #ddd; text-align: center; width: 8%;">STT</th>
-                                <th style="padding: 10px; border: 1px solid #ddd; width: 45%;">Tên sản phẩm</th>
-                                <th style="padding: 10px; border: 1px solid #ddd; text-align: center; width: 12%;">SL</th>
-                                <th style="padding: 10px; border: 1px solid #ddd; text-align: right; width: 15%;">Đơn giá</th>
-                                <th style="padding: 10px; border: 1px solid #ddd; text-align: right; width: 20%;">Thành tiền</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
-
-            danhSachGioHang.forEach((item, index) => {
-                let thanhTien = item.product.price * item.quantity;
-                invoiceHTML += `
-                    <tr>
-                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">${index + 1}</td>
-                        <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">${item.product.name}</td>
-                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">${item.quantity}</td>
-                        <td style="padding: 10px; border: 1px solid #ddd; text-align: right;">${item.product.price.toLocaleString('vi-VN')} đ</td>
-                        <td style="padding: 10px; border: 1px solid #ddd; text-align: right; font-weight: bold;">${thanhTien.toLocaleString('vi-VN')} đ</td>
-                    </tr>
-                `;
-            });
-
-            invoiceHTML += `
-                        </tbody>
-                    </table>
-
-                    <div style="text-align: right; font-size: 16px; margin-bottom: 40px; border-top: 2px solid #005088; padding-top: 10px;">
-                        <strong>Tổng tiền cần thanh toán: <span style="color: #ff5722; font-size: 22px;">${tongTien.toLocaleString('vi-VN')} đ</span></strong>
-                    </div>
-
-                    <table style="width: 100%; margin-top: 30px; font-size: 14px; text-align: center;">
-                        <tr>
-                            <td style="width: 50%;">
-                                <strong>Người mua hàng</strong><br>
-                                <span style="font-size: 12px; color: #888; font-style: italic;">(Ký và ghi rõ họ tên)</span>
-                                <div style="margin-top: 60px;"></div>
-                            </td>
-                            <td style="width: 50%;">
-                                <strong>Người bán hàng (Siêu thị)</strong><br>
-                                <span style="font-size: 12px; color: #888; font-style: italic;">(Ký và ghi rõ họ tên)</span>
-                                <div style="margin-top: 60px; font-weight: bold; color: #005088;">Đã Xác Nhận</div>
-                            </td>
-                        </tr>
-                    </table>
-                    
-                    <div style="text-align: center; margin-top: 70px; color: #888; font-size: 13px; font-style: italic; border-top: 1px dashed #ccc; padding-top: 15px;">
-                        Cảm ơn quý khách đã tin tưởng và mua sắm tại Siêu thị Mini 4.0!
-                    </div>
-                </div>
-            `;
-
-            // Tạo thẻ tạm thời trong bộ nhớ để html2pdf quét dữ liệu
-            let element = document.createElement('div');
-            element.innerHTML = invoiceHTML;
-            
-            // Cấu hình định dạng trang in PDF (Khổ A4 dọc, sắc nét)
-            let opt = {
-                margin:       10,
-                filename:     'HoaDon_' + maDon + '.pdf',
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2 },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-
-            // Thực thi xuất và tự động tải file về máy
-            html2pdf().set(opt).from(element).save();
-        }
-
-        function hoanThanhDonHang() {
-            danhSachGioHang = [];
-            capNhatGiaoDienGioHang();
-            document.getElementById('checkout-modal').style.display = 'none';
-            document.getElementById('checkout-form-step').style.display = 'block';
-            document.getElementById('checkout-qr-step').style.display = 'none';
-            document.getElementById('cust-name').value = '';
-            document.getElementById('cust-address').value = '';
-        }
-    </script>
+    window.onload = () => renderProducts(tatCaSanPham);
+</script>
 </body>
 </html>
